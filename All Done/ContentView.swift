@@ -8,10 +8,6 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State var isRunning: Bool = false
-    @State var endTime: Date? = nil
-    @State var timeRemaining: Double? = 600.0
-    
     var body: some View {
         ZStack(alignment: .top) {
             VStack {
@@ -27,15 +23,16 @@ struct ContentView: View {
                 .padding(.vertical, 4)
                 .background(Color("headerColor"))
                 ScrollView {
-                    TimerRow(isRunning: $isRunning, endTime: $endTime, timeRemaining: $timeRemaining)
-                    TimerRow(isRunning: $isRunning, endTime: $endTime, timeRemaining: $timeRemaining)
-                    TimerRow(isRunning: $isRunning, endTime: $endTime, timeRemaining: $timeRemaining)
-                    TimerRow(isRunning: $isRunning, endTime: $endTime, timeRemaining: $timeRemaining)
-                    TimerRow(isRunning: $isRunning, endTime: $endTime, timeRemaining: $timeRemaining)
-                    TimerRow(isRunning: $isRunning, endTime: $endTime, timeRemaining: $timeRemaining)
-                    TimerRow(isRunning: $isRunning, endTime: $endTime, timeRemaining: $timeRemaining)
-                    TimerRow(isRunning: $isRunning, endTime: $endTime, timeRemaining: $timeRemaining)
-                    TimerRow(isRunning: $isRunning, endTime: $endTime, timeRemaining: $timeRemaining)
+                    TimerRow(timeRemaining: 300.0)
+                    TimerRow(timeRemaining: 600.0)
+                    TimerRow(timeRemaining: 900.0)
+                    TimerRow(timeRemaining: 300.0)
+                    TimerRow(timeRemaining: 300.0)
+                    TimerRow(timeRemaining: 300.0)
+                    TimerRow(timeRemaining: 300.0)
+                    TimerRow(timeRemaining: 300.0)
+                    TimerRow(timeRemaining: 300.0)
+                    TimerRow(timeRemaining: 300.0)
                 }
                 .padding(.top, 5)
                 .background(Color("backgroundColor"))
@@ -55,26 +52,35 @@ struct TimerRow: View {
     @State var minutes: Int = 0
     @State var seconds: Int = 0
     
-    @Binding var isRunning: Bool
-    @Binding var endTime: Date?
-    @Binding var timeRemaining: Double?
+    @State var isRunning: Bool = false
+    @State var endTime: Date?
+    @State var timeRemaining: Double
     
     var secondsRemaining: Double {
-        if let timeRemaining = timeRemaining {
+        if isRunning {
+            if let endTime = endTime {
+                let seconds = endTime.timeIntervalSince(Date())
+                return seconds < 0 ? 0.0 : Double(seconds)
+            }
+            return timeRemaining
+        } else {
             return timeRemaining
         }
-        let seconds = endTime!.timeIntervalSince(Date())
-        return seconds < 0 ? 0.0 : seconds
+    }
+    
+    func textColor() -> Color {
+        return isRunning ? Color.white : Color.accentColor
     }
     
     var body: some View {
         HStack {
             VStack(alignment: .leading) {
                 Text("\(minutes):\(padNumber(n: seconds))")
-                    .font(.title)
-                    .foregroundColor(secondsRemaining == 0 ? Color.red : Color("textColor"))
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
+                    .foregroundColor(secondsRemaining == 0 ? Color.red : textColor())
                 Text("until 5 minute warning")
-                    .foregroundColor(Color("textColor"))
+                    .foregroundColor(textColor())
             }
             Spacer()
             Button(action: {
@@ -86,37 +92,34 @@ struct TimerRow: View {
             }) {
                 Image(systemName: isRunning ? "pause.fill" : "play.fill")
                     .resizable()
-                    .foregroundColor(Color("textColor"))
+                    .foregroundColor(textColor())
                     .frame(width: 40, height: 40)
             }
         }
         .padding()
-        .background(Color.accentColor)
+        .background(isRunning ? Color.accentColor : Color("headerColor"))
         .cornerRadius(10)
         .padding(.horizontal, 10.0)
         .onAppear {
-            if let timeRemaining = timeRemaining {
-                seconds = Int(timeRemaining) % 60
-                minutes = Int(timeRemaining) / 60
-            }
+            seconds = Int(timeRemaining) % 60
+            minutes = Int(timeRemaining) / 60
         }
     }
     
     func startTimer(){
         isRunning = true
-        endTime = Date(timeInterval: timeRemaining!, since: Date())
-        timeRemaining = nil
+        endTime = Date(timeInterval: timeRemaining, since: Date())
 
         timer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true){ tempTimer in
-            let totalSeconds = secondsRemaining
-            seconds = Int(totalSeconds) % 60
-            minutes = Int(totalSeconds) / 60
+            timeRemaining = secondsRemaining
+            
+            seconds = Int(timeRemaining) % 60
+            minutes = Int(timeRemaining) / 60
         }
     }
     
     func stopTimer(){
         isRunning = false
-        timeRemaining = secondsRemaining
         endTime = nil
         timer?.invalidate()
         timer = nil
