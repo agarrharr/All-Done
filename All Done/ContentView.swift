@@ -13,8 +13,39 @@ struct ContentView: View {
     @State var timeRemaining: Double? = 600.0
     
     var body: some View {
-        List {
-            TimerRow(isRunning: $isRunning, endTime: $endTime, timeRemaining: $timeRemaining)
+        ZStack(alignment: .top) {
+            VStack {
+                HStack() {
+                    Button(action: /*@START_MENU_TOKEN@*/{}/*@END_MENU_TOKEN@*/, label: {
+                        Text("Edit")
+                    })
+                    Spacer()
+                    Image(systemName: "gear")
+                        .foregroundColor(Color.accentColor)
+                }
+                .padding(.horizontal)
+                .padding(.vertical, 4)
+                .background(Color("headerColor"))
+                ScrollView {
+                    TimerRow(isRunning: $isRunning, endTime: $endTime, timeRemaining: $timeRemaining)
+                    TimerRow(isRunning: $isRunning, endTime: $endTime, timeRemaining: $timeRemaining)
+                    TimerRow(isRunning: $isRunning, endTime: $endTime, timeRemaining: $timeRemaining)
+                    TimerRow(isRunning: $isRunning, endTime: $endTime, timeRemaining: $timeRemaining)
+                    TimerRow(isRunning: $isRunning, endTime: $endTime, timeRemaining: $timeRemaining)
+                    TimerRow(isRunning: $isRunning, endTime: $endTime, timeRemaining: $timeRemaining)
+                    TimerRow(isRunning: $isRunning, endTime: $endTime, timeRemaining: $timeRemaining)
+                    TimerRow(isRunning: $isRunning, endTime: $endTime, timeRemaining: $timeRemaining)
+                    TimerRow(isRunning: $isRunning, endTime: $endTime, timeRemaining: $timeRemaining)
+                }
+                .padding(.top, 5)
+                .background(Color("backgroundColor"))
+            }
+            
+            GeometryReader { reader in
+                Color("headerColor")
+                    .frame(height: reader.safeAreaInsets.top, alignment: .top)
+                    .ignoresSafeArea()
+            }
         }
     }
 }
@@ -38,8 +69,13 @@ struct TimerRow: View {
     
     var body: some View {
         HStack {
-            Text("\(minutes):\(padNumber(n: seconds)) until 5 minute warning")
-                .foregroundColor(secondsRemaining == 0 ? Color.red : Color("textColor"))
+            VStack(alignment: .leading) {
+                Text("\(minutes):\(padNumber(n: seconds))")
+                    .font(.title)
+                    .foregroundColor(secondsRemaining == 0 ? Color.red : Color("textColor"))
+                Text("until 5 minute warning")
+                    .foregroundColor(Color("textColor"))
+            }
             Spacer()
             Button(action: {
                 if isRunning {
@@ -49,8 +85,15 @@ struct TimerRow: View {
                 }
             }) {
                 Image(systemName: isRunning ? "pause.fill" : "play.fill")
+                    .resizable()
+                    .foregroundColor(Color("textColor"))
+                    .frame(width: 40, height: 40)
             }
         }
+        .padding()
+        .background(Color.accentColor)
+        .cornerRadius(10)
+        .padding(.horizontal, 10.0)
         .onAppear {
             if let timeRemaining = timeRemaining {
                 seconds = Int(timeRemaining) % 60
